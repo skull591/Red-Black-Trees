@@ -1,6 +1,5 @@
 package com.Alex.RedBlackTree;
 
-import java.util.concurrent.Exchanger;
 
 public class Tree {
 	Node root;
@@ -13,7 +12,9 @@ public class Tree {
 		Node newNode=new Node(value);
 		Node now,lastnow;
 		if(root==null){
+			
 			root=newNode;
+			insertFixUp(newNode,false);
 			return;
 		}else{
 			now=root;
@@ -37,8 +38,117 @@ public class Tree {
 		}else {
 			lastnow.right=newNode;
 		}
+		
+		insertFixUp(newNode,isLeft);
 	}
 	
+	private void insertFixUp(Node now, boolean isleft) {
+		if(now==root){
+			now.isRed=false;
+			return;
+		}
+		if (!now.parent.isRed) {
+			return;
+		}
+		Node uncle=null;
+		boolean isUncleLeft;
+		if (now.parent==now.parent.parent.left) {
+			uncle=now.parent.parent.right;
+			isUncleLeft=false;
+		}else {
+			uncle=now.parent.parent.left;
+			isUncleLeft=true;
+		}
+		Node tem=uncle;
+		if (uncle==null) {
+			uncle=new Node(-1);
+			uncle.isRed=false;
+		}
+		if (uncle.isRed) {
+			uncle.isRed=false;
+			now.parent.isRed=false;
+			now.parent.parent.isRed=true;
+			boolean left;
+			if (now.parent.parent.parent!=null && now.parent.parent.parent.left==now.parent.parent.parent) {
+				left=true;
+			}else {
+				left=false;
+			}
+			insertFixUp(now.parent.parent,left);
+			uncle=tem;
+			return;
+		}
+		if (!isUncleLeft) {
+			RightFixUp(now,isleft);
+		}else {
+			LeftFixUp(now,isleft);
+		}
+		uncle=tem;
+	}
+	private void RightFixUp(Node now, boolean isleft) {
+		if (isleft) {
+			rightRotate(now.parent);
+			now.parent.isRed=false;
+			now.parent.right.isRed=true;
+		}else{
+			leftRotate(now);
+			rightRotate(now);
+			now.isRed=false;
+			now.right.isRed=true;
+		}
+	}
+	private void LeftFixUp(Node now, boolean isleft) {
+		if(!isleft){
+			leftRotate(now.parent);
+			now.parent.isRed=false;
+			now.parent.left.isRed=true;
+		}else {
+			rightRotate(now);
+			leftRotate(now);
+			now.isRed=false;
+			now.left.isRed=true;
+		}
+	}
+	
+	private void leftRotate(Node now) {
+		Node parent=now.parent;
+		if(parent.parent!=null && parent==parent.parent.left){
+			parent.parent.left=now;
+		}
+		if(parent.parent!=null && parent==parent.parent.right){
+			parent.parent.right=now;
+		}	
+		if(now.left!=null){
+			now.left.parent=parent;
+		}
+		parent.right=now.left;
+		now.parent=parent.parent;
+		parent.parent=now;
+		now.left=parent;
+		if (root==parent) {
+			root=now;
+		}
+	}
+	
+	private void rightRotate(Node now) {
+		Node parent=now.parent;
+		if(parent.parent!=null && parent==parent.parent.left){
+				parent.parent.left=now;
+		}
+		if(parent.parent!=null && parent==parent.parent.right){
+			parent.parent.right=now;
+		}
+		if(now.right!=null){
+			now.right.parent=parent;
+		}
+		parent.left=now.right;
+		now.parent=parent.parent;
+		parent.parent=now;
+		now.right=parent;
+		if (root==parent) {
+			root=now;
+		}
+	}
 	private void exchange(Node one, Node two) {
 		double tem=one.value;
 		one.value=two.value;
@@ -111,7 +221,12 @@ public class Tree {
 	public void print(Node now) {
 		if(now!=null){
 			print(now.left);
-			System.out.println(now.value);
+			System.out.print(now.value+" "+now.isRed);
+			if(now.parent!=null){
+				System.out.println(" "+now.parent.isRed+" "+now.parent.value);
+			}else {
+				System.out.println();
+			}
 			print(now.right);
 		}
 	}
