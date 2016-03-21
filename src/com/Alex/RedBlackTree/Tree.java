@@ -67,7 +67,7 @@ public class Tree {
 			n.parent.right=son;
 		}
 	}
-	public void delete(double value){
+	public boolean delete(double value){
 		Node now=root;
 		boolean isleft=false;
 		while(now!=null && now.value!=value){
@@ -82,23 +82,29 @@ public class Tree {
 		if(now!=null){
 			if (now.left==null) {
 				remove(now,now.right,isleft);
-				return;
+				return true;
 			}
 			if (now.right==null) {
 				remove(now,now.left,isleft);
-				return;
+				return true;
 			}
 			
 			Node min=now.right;
+			isleft=false;
 			while(min.left!=null){
 				min=min.left;
+				isleft=true;
 			}
-			
 			exchange(min,now);
-			remove(min,min.right,true);
+			remove(min,min.right,isleft);
+			return true;
+		}else{
+			return false;
 		}
 	}
-	
+	public void deleteAll(double value) {
+		while(delete(value)){}
+	}
 	public void printall() {
 		print(root);
 	}
