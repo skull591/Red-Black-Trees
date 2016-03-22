@@ -1,6 +1,9 @@
 package com.Alex.RedBlackTree;
 
-import java.util.concurrent.Exchanger;
+import java.util.ArrayList;
+import java.util.LinkedList;
+
+import javax.swing.table.TableStringConverter;
 
 public class Tree {
 	Node root;
@@ -166,6 +169,75 @@ public class Tree {
 		}
 		return false;
 	}
+	private void deleteFixUp(Node now) {
+		if (now.isRed) {
+			now.isRed=false;
+			return;
+		}
+		if (now==root) {
+			return;
+		}
+		boolean isLeft=now==now.parent.left? true:false;
+		Node parent=now.parent;
+		Node brother=isLeft? parent.right:parent.left;
+		Node leftN=brother.left;
+		Node rightN=brother.left;
+		if (!leftN.isRed && !rightN.isRed) {
+			bothNeBlack(parent,brother,now,isLeft);
+			return;
+		}
+		
+		if (isLeft) {
+			rightDFixUp(now,parent,brother,leftN,rightN);
+		}else {
+			leftDFixUp(now,parent,brother,leftN,rightN);
+		}
+	}
+	private void rightDFixUp(Node now,Node parent, Node brother,Node leftN, Node rightN) {
+		if (rightN.isRed) {
+			leftRotate(brother);
+			brother.isRed=parent.isRed;
+			parent.isRed=false;
+			rightN.isRed=false;
+		}else{
+			rightRotate(leftN);
+			leftRotate(leftN);
+			leftN.isRed=parent.isRed;
+			parent.isRed=false;
+		}
+	}
+	private void leftDFixUp(Node now,Node parent, Node brother,Node leftN, Node rightN) {
+		if (leftN.isRed) {
+			rightRotate(brother);
+			brother.isRed=parent.isRed;
+			parent.isRed=false;
+			leftN.isRed=false;
+		}else {
+			leftRotate(rightN);
+			rightRotate(rightN);
+			rightN.isRed=parent.isRed;
+			parent.isRed=false;
+		}
+	}
+	private void bothNeBlack(Node parent,Node brother,Node now,boolean isLeft) {
+		if (brother.isRed) {
+			if (isLeft) {
+				rightRotate(brother);
+			}else {
+				leftRotate(brother);
+			}
+			brother.isRed=false;
+			parent.isRed=true;
+			deleteFixUp(now);
+		}else {
+			brother.isRed=true;
+			if (parent.isRed) {
+				parent.isRed=false;
+			}else {
+				deleteFixUp(parent);
+			}
+		}
+	}
 	private void remove(Node now) {
 		boolean isLeft=now.parent.left==now? true:false;
 		if (!now.left.isReal && !now.right.isReal) {
@@ -177,6 +249,9 @@ public class Tree {
 				now.parent.left=now.left;
 			}else {
 				now.parent.right=now.left;
+			}
+			if (!now.isRed) {
+				deleteFixUp(now.left);
 			}
 		}else {
 			removeCase2(now,isLeft);
@@ -194,6 +269,9 @@ public class Tree {
 			}else {
 				now.parent.right=now.right;
 			}
+			if (!now.isRed) {
+				deleteFixUp(now.right);
+			}
 		}else {
 			removeCase3(now, isLeft);
 		}
@@ -209,6 +287,9 @@ public class Tree {
 				now.parent.left=now.left;
 			}else {
 				now.parent.right=now.left;
+			}
+			if (!now.isRed) {
+				deleteFixUp(now.left);
 			}
 		}else {
 			removeExchange(now, isLeft);
@@ -229,6 +310,10 @@ public class Tree {
 		}else {
 			min.right.parent=min.parent;
 			min.parent.right=min.right;
+
+		}			
+		if (!min.isRed) {
+			deleteFixUp(min.right);
 		}
 	}
 	
@@ -252,5 +337,45 @@ public class Tree {
 			print(now.right);
 		}
 	}
-
+	public void validate() {
+		if (root.isRed) {
+			System.out.println("Error: root is red!");
+		}
+		LinkedList<Node> list=new LinkedList<>();
+		int length=-1;
+		Node now=root;
+		while(now.isReal){
+			length++;
+			now=now.left;
+		}
+		test(list,root,length);
+	}
+	
+	public void test(LinkedList<Node> list,Node now,int length) {
+		if (!now.isReal) {
+			int len=list.size();
+			if (len!=length) {
+				System.out.println("Error: not the same lenght!");
+				for(Node tem:list){
+					System.out.print(tem.value+" ");
+				}
+				System.out.println();
+			}
+		}else {
+			if (now.isRed && now.left.isRed) {
+				System.out.println("Error: two red in a row! "+now.value+" "+now.left.value);
+			}
+			if (now.isRed && now.right.isRed) {
+				System.out.println("Error: two red in a row! "+now.value+" "+now.right.value);
+			}
+			if (!now.isRed) {
+				list.push(now);
+			}
+			test(list, now.left, length);
+			test(list, now.right, length);
+			if (!now.isRed) {
+				list.pop();
+			}
+		}
+	}
 }

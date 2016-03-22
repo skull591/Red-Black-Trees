@@ -1,5 +1,6 @@
 package com.Alex.RedBlackTree;
 
+import java.awt.Checkbox;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,11 +16,14 @@ public class Main {
 			tree.insert(Double.parseDouble(numbers[i]));
 		}
 		tree.printall();
+		tree.validate();
 		numbers=reader.readLine().split(" ");
 		for(int i=0;i<numbers.length;i++){
 			tree.delete(Double.parseDouble(numbers[i]));
 		}
 		tree.printall();
+		tree.validate();
+		System.out.println("finished!");
 	}
 
 }
