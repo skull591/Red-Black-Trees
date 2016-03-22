@@ -17,7 +17,7 @@ public class Main {
 		tree.printall();
 		numbers=reader.readLine().split(" ");
 		for(int i=0;i<numbers.length;i++){
-			tree.deleteAll(Double.parseDouble(numbers[i]));
+			tree.delete(Double.parseDouble(numbers[i]));
 		}
 		tree.printall();
 	}

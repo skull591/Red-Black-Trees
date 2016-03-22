@@ -1,5 +1,6 @@
 package com.Alex.RedBlackTree;
 
+import java.util.concurrent.Exchanger;
 
 public class Tree {
 	Node root;
@@ -17,8 +18,6 @@ public class Tree {
 			newNode.parent=newNode;
 			fakeNode(newNode);
 			insertFixUp(newNode,newNode.parent);
-			printall();
-			System.out.println();
 			return;
 		}else {
 			now=root;
@@ -27,7 +26,11 @@ public class Tree {
 		lastNow=now;
 		while (now.isReal) {
 			lastNow=now;
-			if (now.value>=value) {
+			if (now.value==value) {
+				now.time++;
+				return;
+			}
+			if (now.value>value) {
 				now=now.left;
 				isLeft=true;
 			}else {
@@ -43,8 +46,6 @@ public class Tree {
 		}
 		fakeNode(newNode);
 		insertFixUp(newNode,newNode.parent);
-		printall();
-		System.out.println();
 	}
 	private void fakeNode(Node now) {
 		Node tem=new Node(-1);
@@ -123,6 +124,11 @@ public class Tree {
 			now.parent=now;
 		}else {
 			now.parent=parent.parent;
+			if (parent==parent.parent.left) {
+				parent.parent.left=now;
+			}else {
+				parent.parent.right=now;
+			}
 		}
 		parent.parent=now;
 	}
@@ -137,11 +143,99 @@ public class Tree {
 			now.parent=now;
 		}else {
 			now.parent=parent.parent;
+			if (parent==parent.parent.left) {
+				parent.parent.left=now;
+			}else {
+				parent.parent.right=now;
+			}
 		}
 		parent.parent=now;
 	}
-	public void deleteAll(double value) {
-		//while(delete(value)){}
+	public boolean delete(double value) {
+		Node now=root;
+		while(now.isReal && now.value!=value){
+			if (now.value>=value) {
+				now=now.left;
+			}else {
+				now=now.right;
+			}
+		}
+		if (now.isReal) {
+			remove(now);
+			return true;
+		}
+		return false;
+	}
+	private void remove(Node now) {
+		boolean isLeft=now.parent.left==now? true:false;
+		if (!now.left.isReal && !now.right.isReal) {
+			now.left.parent=now==root? now.left:now.parent;
+			if (now==root) {
+				root=now.left;
+			}
+			if (isLeft) {
+				now.parent.left=now.left;
+			}else {
+				now.parent.right=now.left;
+			}
+		}else {
+			removeCase2(now,isLeft);
+		}
+	}
+	
+	private void removeCase2(Node now,boolean isLeft) {
+		if (!now.left.isReal) {
+			now.right.parent=now==root? now.right:now.parent;
+			if (now==root) {
+				root=now.right;
+			}
+			if (isLeft) {
+				now.parent.left=now.right;
+			}else {
+				now.parent.right=now.right;
+			}
+		}else {
+			removeCase3(now, isLeft);
+		}
+	}
+	
+	private void removeCase3(Node now, boolean isLeft) {
+		if (!now.right.isReal) {
+			now.left.parent=now==root? now.left:now.parent;
+			if (now==root) {
+				root=now.left;
+			}
+			if (isLeft) {
+				now.parent.left=now.left;
+			}else {
+				now.parent.right=now.left;
+			}
+		}else {
+			removeExchange(now, isLeft);
+		}
+	}
+	
+	private void removeExchange(Node now, boolean isLeft) {
+		Node min=now.right;
+		boolean once=false;
+		while (min.left.isReal) {
+			min=min.left;
+			once=true;
+		}
+		exchange(min, now);
+		if (once) {
+			min.right.parent=min.parent;
+			min.parent.left=min.right;
+		}else {
+			min.right.parent=min.parent;
+			min.parent.right=min.right;
+		}
+	}
+	
+	private void exchange(Node min, Node now) {
+		double tem=min.value;
+		min.value=now.value;
+		now.value=tem;
 	}
 	public void printall() {
 		print(root);
@@ -149,7 +243,7 @@ public class Tree {
 	public void print(Node now) {
 		if(now.isReal){
 			print(now.left);
-			System.out.print(now.value+" "+now.isRed);
+			System.out.print(now.value+" "+now.isRed+" "+now.time);
 			if(now.parent!=null){
 				System.out.println(" "+now.parent.isRed+" "+now.parent.value);
 			}else {
