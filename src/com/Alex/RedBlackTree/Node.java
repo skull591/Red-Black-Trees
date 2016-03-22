@@ -7,6 +7,7 @@ public class Node {
 	Node left;
 	Node right;
 	int layer;
+	boolean isReal;
 	
 	public Node(double i){
 		layer=0;
