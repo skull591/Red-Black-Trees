@@ -342,9 +342,9 @@ public class Tree {
 			System.out.println("Error: root is red!");
 		}
 		LinkedList<Node> list=new LinkedList<>();
-		int length=-1;
+		int length=0;
 		Node now=root;
-		while(now.isReal){
+		while(now.isReal && !now.isRed){
 			length++;
 			now=now.left;
 		}
@@ -355,7 +355,7 @@ public class Tree {
 		if (!now.isReal) {
 			int len=list.size();
 			if (len!=length) {
-				System.out.println("Error: not the same lenght!");
+				System.out.println("Error: not the same lenght! "+len+" "+length);
 				for(Node tem:list){
 					System.out.print(tem.value+" ");
 				}
